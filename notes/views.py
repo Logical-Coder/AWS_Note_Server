@@ -49,16 +49,20 @@ def _build_type_choices():
 
 def home(request):
     if request.method == 'POST':
-        question      = request.POST.get('question', '').strip()
-        answer        = request.POST.get('answer', '').strip()
-        question_type = _resolve_type(request.POST)
-        attachment    = request.FILES.get('attachment')
+        question        = request.POST.get('question', '').strip()
+        answer          = request.POST.get('answer', '').strip()
+        question_type   = _resolve_type(request.POST)
+        question_subtopic = request.POST.get('question_subtopic', '').strip()
+        question_format = request.POST.get('question_format', 'description')
+        attachment      = request.FILES.get('attachment')
 
         if question:
             QANote.objects.create(
                 question=question,
                 answer=answer,
                 question_type=question_type,
+                question_subtopic=question_subtopic,
+                question_format=question_format,
                 attachment=attachment,
             )
         return redirect('home')
@@ -76,10 +80,12 @@ def home(request):
                 notes.filter(answer__icontains=search_query)
 
     return render(request, 'notes/home.html', {
-        'notes':        notes,
-        'type_choices': _build_type_choices(),
-        'filter_type':  filter_type,
-        'search_query': search_query,
+        'notes':           notes,
+        'type_choices':    _build_type_choices(),
+        'format_choices':  QANote.QUESTION_FORMAT_CHOICES,
+        'subtopics':       QANote.QUESTION_SUBTOPICS,
+        'filter_type':     filter_type,
+        'search_query':    search_query,
     })
 
 
@@ -87,9 +93,11 @@ def edit_note(request, note_id):
     note = get_object_or_404(QANote, id=note_id)
 
     if request.method == 'POST':
-        note.question      = request.POST.get('question', '').strip()
-        note.answer        = request.POST.get('answer', '').strip()
-        note.question_type = _resolve_type(request.POST)
+        note.question        = request.POST.get('question', '').strip()
+        note.answer          = request.POST.get('answer', '').strip()
+        note.question_type   = _resolve_type(request.POST)
+        note.question_subtopic = request.POST.get('question_subtopic', '').strip()
+        note.question_format = request.POST.get('question_format', 'description')
 
         if request.FILES.get('attachment'):
             note.attachment = request.FILES.get('attachment')
@@ -98,8 +106,10 @@ def edit_note(request, note_id):
         return redirect('home')
 
     return render(request, 'notes/edit_note.html', {
-        'note':         note,
-        'type_choices': _build_type_choices(),
+        'note':            note,
+        'type_choices':    _build_type_choices(),
+        'format_choices':  QANote.QUESTION_FORMAT_CHOICES,
+        'subtopics':       QANote.QUESTION_SUBTOPICS,
     })
 
 
