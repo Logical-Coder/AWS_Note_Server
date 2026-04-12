@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Prep — Q&A Notes</title>
+    <meta name="description" content="Store and review interview Q&A with code support for DSA, System Design, Python, JavaScript and more.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- highlight.js for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <!-- marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        /* ===== CSS VARIABLES ===== */
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-card: #1c2128;
+            --bg-input: #21262d;
+            --border: #30363d;
+            --border-hover: #484f58;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #656d76;
+            --accent: #388bfd;
+            --accent-hover: #58a6ff;
+            --success: #3fb950;
+            --warning: #d29922;
+            --danger: #f85149;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
+            --transition: 0.2s ease;
+
+            /* Type badge colors */
+            --dsa:         #58a6ff;
+            --system_design: #bc8cff;
+            --os:          #ff7b72;
+            --dbms:        #ffa657;
+            --networking:  #39d353;
+            --oop:         #f778ba;
+            --sql:         #79c0ff;
+            --javascript:  #f0e060;
+            --python:      #4d94ff;
+            --java:        #ff9f43;
+            --react:       #61dafb;
+            --behavioral:  #a5d6ff;
+            --other:       #8b949e;
+        }
+
+        /* ===== RESET & BASE ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            gap: 16px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+        .logo-icon {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent), #bc8cff);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            justify-content: flex-end;
+        }
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 340px;
+        }
+        .search-box input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px 8px 36px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color var(--transition);
+        }
+        .search-box input:focus { border-color: var(--accent); }
+        .search-icon {
+            position: absolute;
+            left: 10px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .btn-add {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background var(--transition), transform var(--transition);
+            font-family: 'Inter', sans-serif;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-add:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+        /* ===== MAIN LAYOUT ===== */
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 24px 60px;
+        }
+
+        /* ===== ADD FORM PANEL ===== */
+        .add-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 32px;
+            display: none;
+            animation: slideDown 0.25s ease;
+        }
+        .add-panel.open { display: block; }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 16px;
+        }
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 640px) {
+            .form-row-2 { grid-template-columns: 1fr; }
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"],
+        input[type="search"],
+        select,
+        textarea {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color var(--transition), box-shadow var(--transition);
+            -webkit-appearance: none;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(56,139,253,0.15);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+        select option { background: var(--bg-card); }
+
+        /* Code editor textarea */
+        .code-editor {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            tab-size: 4;
+            min-height: 160px;
+            background: #0d1117;
+            color: #e6edf3;
+        }
+
+        /* Markdown hint */
+        .md-hint {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+        .md-hint code {
+            background: var(--bg-card);
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-hover);
+            font-size: 0.78rem;
+        }
+
+        /* File input */
+        input[type="file"] {
+            background: var(--bg-input);
+            border: 1px dashed var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        input[type="file"]:hover { border-color: var(--accent); }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 4px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #1f6feb);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 10px 24px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: opacity var(--transition), transform var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: border-color var(--transition), color var(--transition);
+        }
+        .btn-ghost:hover { border-color: var(--border-hover); color: var(--text-primary); }
+
+        /* ===== FILTER / STATS BAR ===== */
+        .stats-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .stats-count {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        .stats-count strong { color: var(--text-primary); }
+
+        .filter-scroll {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .filter-pill {
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            transition: all var(--transition);
+            white-space: nowrap;
+        }
+        .filter-pill:hover {
+            border-color: var(--accent);
+            color: var(--accent-hover);
+        }
+        .filter-pill.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        /* ===== Q&A CARDS GRID ===== */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .cards-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ===== Q&A CARD ===== */
+        .qa-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+        .qa-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            padding: 16px 18px 12px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .type-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* Type badge colors */
+        .badge-dsa         { background: rgba(88,166,255,0.15); color: var(--dsa); }
+        .badge-system_design { background: rgba(188,140,255,0.15); color: var(--system_design); }
+        .badge-os          { background: rgba(255,123,114,0.15); color: var(--os); }
+        .badge-dbms        { background: rgba(255,166,87,0.15); color: var(--dbms); }
+        .badge-networking  { background: rgba(57,211,83,0.15); color: var(--networking); }
+        .badge-oop         { background: rgba(247,120,186,0.15); color: var(--oop); }
+        .badge-sql         { background: rgba(121,192,255,0.15); color: var(--sql); }
+        .badge-javascript  { background: rgba(240,224,96,0.15); color: var(--javascript); }
+        .badge-python      { background: rgba(77,148,255,0.15); color: var(--python); }
+        .badge-java        { background: rgba(255,159,67,0.15); color: var(--java); }
+        .badge-react       { background: rgba(97,218,251,0.15); color: var(--react); }
+        .badge-behavioral  { background: rgba(165,214,255,0.15); color: var(--behavioral); }
+        .badge-other       { background: rgba(139,148,158,0.15); color: var(--other); }
+
+        .card-num {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+
+        .card-question {
+            padding: 0 18px 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.5;
+            cursor: pointer;
+        }
+
+        /* Collapsible answer */
+        .card-answer-wrap {
+            border-top: 1px solid var(--border);
+            display: none;
+            padding: 16px 18px;
+            background: rgba(0,0,0,0.2);
+        }
+        .card-answer-wrap.open { display: block; }
+
+        .answer-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--success);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            margin-bottom: 10px;
+        }
+
+        /* Markdown rendered content */
+        .md-body { font-size: 0.875rem; color: var(--text-primary); line-height: 1.75; }
+        .md-body p { margin-bottom: 10px; }
+        .md-body p:last-child { margin-bottom: 0; }
+        .md-body strong { color: var(--accent-hover); }
+        .md-body em { color: var(--text-secondary); }
+        .md-body ul, .md-body ol { padding-left: 20px; margin-bottom: 10px; }
+        .md-body li { margin-bottom: 4px; }
+        .md-body h1, .md-body h2, .md-body h3 {
+            color: var(--text-primary);
+            margin: 14px 0 8px;
+            font-weight: 600;
+        }
+        .md-body h1 { font-size: 1.1rem; }
+        .md-body h2 { font-size: 1rem; }
+        .md-body h3 { font-size: 0.9rem; }
+        .md-body code {
+            background: var(--bg-primary);
+            color: var(--accent-hover);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+        }
+        .md-body pre {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .md-body pre code {
+            background: transparent;
+            padding: 14px 16px;
+            display: block;
+            font-size: 0.82rem;
+            line-height: 1.65;
+            color: var(--text-primary);
+        }
+        .md-body blockquote {
+            border-left: 3px solid var(--accent);
+            padding: 8px 14px;
+            color: var(--text-secondary);
+            background: rgba(56,139,253,0.07);
+            border-radius: 0 4px 4px 0;
+            margin: 10px 0;
+            font-style: italic;
+        }
+        .md-body table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            margin: 10px 0;
+        }
+        .md-body th, .md-body td {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+        .md-body th { background: var(--bg-input); font-weight: 600; }
+
+        /* Card footer */
+        .card-footer {
+            padding: 10px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+        }
+        .card-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .card-actions {
+            display: flex;
+            gap: 6px;
+        }
+        .action-btn {
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .action-btn:hover {
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+        .action-btn.danger:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: rgba(248,81,73,0.08);
+        }
+        .action-btn.toggle-btn {
+            color: var(--accent);
+            border-color: rgba(56,139,253,0.3);
+        }
+        .action-btn.toggle-btn:hover {
+            background: rgba(56,139,253,0.1);
+            color: var(--accent-hover);
+        }
+
+        /* Attachment link */
+        .attach-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.78rem;
+            color: var(--accent);
+            text-decoration: none;
+            padding: 4px 10px;
+            background: rgba(56,139,253,0.1);
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+        .attach-link:hover { background: rgba(56,139,253,0.2); }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-muted);
+        }
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        .empty-state h3 {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .empty-state p { font-size: 0.875rem; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 640px) {
+            .header-inner { height: 56px; }
+            .logo span { display: none; }
+            .search-box { max-width: none; }
+            .main { padding: 16px 12px 60px; }
+            .add-panel { padding: 16px; }
+            .cards-grid { gap: 12px; }
+        }
+        @media (min-width: 641px) and (max-width: 1023px) {
+            .cards-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (min-width: 1024px) {
+            .cards-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        /* ===== UTILS ===== */
+        .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+        /* Tab indicator */
+        .tab-bar {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 14px;
+        }
+        .tab {
+            padding: 8px 16px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all var(--transition);
+            user-select: none;
+        }
+        .tab.active {
+            color: var(--accent-hover);
+            border-bottom-color: var(--accent);
+        }
+        .tab:hover:not(.active) { color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header">
+    <div class="header-inner">
+        <div class="logo">
+            <div class="logo-icon">🧠</div>
+            <span>Interview Prep</span>
+        </div>
+        <div class="header-actions">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <form method="get" id="search-form">
+                    <input type="search" name="q" id="search-input"
+                           placeholder="Search questions or answers…"
+                           value="{{ search_query }}"
+                           autocomplete="off">
+                    {% if filter_type %}
+                        <input type="hidden" name="type" value="{{ filter_type }}">
+                    {% endif %}
+                </form>
+            </div>
+            <button class="btn-add" id="toggle-form-btn" onclick="toggleForm()">
+                <span id="form-btn-icon">＋</span>
+                <span id="form-btn-text">Add Q&amp;A</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- ===== MAIN ===== -->
+<main class="main">
+
+    <!-- ADD FORM PANEL -->
+    <div class="add-panel" id="add-panel">
+        <div class="panel-title">✏️ New Question &amp; Answer</div>
+
+        <form method="post" enctype="multipart/form-data" id="qa-form">
+            {% csrf_token %}
+
+            <div class="form-grid">
+                <!-- Question -->
+                <div>
+                    <label for="question">Question *</label>
+                    <textarea name="question" id="question" rows="3"
+                              placeholder="e.g. Explain the difference between process and thread…"
+                              required></textarea>
+                </div>
+
+                <!-- Type -->
+                <div>
+                    <label for="question_type">Type</label>
+                    <select name="question_type" id="question_type" onchange="toggleCustomType(this, 'custom_type')">
+                        {% for val, display in type_choices %}
+                            <option value="{{ val }}">{{ display }}</option>
+                        {% endfor %}
+                        <option value="__custom__">＋ Add Custom Type…</option>
+                    </select>
+                    <!-- Revealed when user picks 'Add Custom Type' -->
+                    <div id="custom_type_wrap" style="display:none; margin-top:8px;">
+                        <input type="text" name="custom_type" id="custom_type"
+                               placeholder="e.g. Spring Boot, GraphQL, Flutter…"
+                               maxlength="50"
+                               autocomplete="off">
+                        <div class="md-hint" style="margin-top:4px;">💡 This type will be saved and appear in filters automatically</div>
+                    </div>
+                </div>
+
+                <!-- Answer with Write/Preview tabs -->
+                <div>
+                    <label>Answer (supports Markdown &amp; code blocks)</label>
+                    <div class="tab-bar">
+                        <div class="tab active" id="tab-write" onclick="switchTab('write')">✏️ Write</div>
+                        <div class="tab" id="tab-preview" onclick="switchTab('preview')">👁 Preview</div>
+                    </div>
+                    <div id="answer-write-area">
+                        <textarea name="answer" id="answer" class="code-editor" rows="8"
+                                  placeholder="Write your answer here…&#10;&#10;Supports Markdown:&#10;- **bold**, *italic*, `inline code`&#10;- Code blocks: ```python&#10;  def hello(): pass&#10;  ```&#10;- Tables, lists, blockquotes"></textarea>
+                        <div class="md-hint">
+                            💡 Tip: Use
+                            <code>```python</code> … <code>```</code>
+                            for syntax-highlighted code blocks
+                        </div>
+                    </div>
+                    <div id="answer-preview-area" style="display:none; background:var(--bg-input); border:1px solid var(--border); border-radius:8px; padding:14px; min-height:120px;">
+                        <div class="md-body" id="answer-preview-content"></div>
+                    </div>
+                </div>
+
+                <!-- Attachment -->
+                <div>
+                    <label for="attachment">Attachment (optional)</label>
+                    <input type="file" name="attachment" id="attachment">
+                </div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <button type="button" class="btn-ghost" onclick="toggleForm()">Cancel</button>
+                    <button type="submit" class="btn-primary">💾 Save Q&amp;A</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- STATS & FILTER BAR -->
+    <div class="stats-bar">
+        <div class="stats-count">
+            <strong>{{ notes|length }}</strong>
+            question{{ notes|length|pluralize }} found
+            {% if filter_type %}· filtered by <em>{{ filter_type }}</em>{% endif %}
+            {% if search_query %}· matching "<em>{{ search_query }}</em>"{% endif %}
+        </div>
+    </div>
+
+    <!-- TYPE FILTER PILLS -->
+    <div class="filter-scroll" style="margin-bottom:20px;">
+        <a href="{% url 'home' %}{% if search_query %}?q={{ search_query }}{% endif %}"
+           class="filter-pill {% if not filter_type %}active{% endif %}">All</a>
+        {% for val, display in type_choices %}
+        <a href="?type={{ val }}{% if search_query %}&q={{ search_query }}{% endif %}"
+           class="filter-pill {% if filter_type == val %}active{% endif %}">
+            {{ display }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Q&A CARDS -->
+    {% if notes %}
+    <div class="cards-grid" id="cards-grid">
+        {% for note in notes %}
+        <div class="qa-card" id="card-{{ note.id }}">
+            <div class="card-header">
+                <span class="type-badge badge-{{ note.question_type }}">
+                    {{ note.get_question_type_display }}
+                </span>
+                <span class="card-num">#{{ forloop.counter }}</span>
+            </div>
+
+            <div class="card-question" onclick="toggleAnswer('{{ note.id }}')">
+                {{ note.question }}
+            </div>
+
+            <div class="card-answer-wrap" id="answer-{{ note.id }}">
+                <div class="answer-label">✅ Answer</div>
+                {# Hidden textarea preserves ALL newlines/spaces/indentation — unlike HTML attributes #}
+                <textarea id="raw-{{ note.id }}" style="display:none;" aria-hidden="true">{{ note.answer }}</textarea>
+                <div class="md-body" id="md-{{ note.id }}"></div>
+
+                {% if note.attachment %}
+                <a class="attach-link" href="{{ note.attachment.url }}" target="_blank">
+                    📎 Open Attachment
+                </a>
+                {% endif %}
+            </div>
+
+            <div class="card-footer">
+                <span class="card-meta">{{ note.created_at|date:"M d, Y" }}</span>
+                <div class="card-actions">
+                    <button class="action-btn toggle-btn" onclick="toggleAnswer('{{ note.id }}')">
+                        👁 Answer
+                    </button>
+                    <a class="action-btn" href="{% url 'edit_note' note.id %}">✏️ Edit</a>
+                    <a class="action-btn danger" href="{% url 'delete_note' note.id %}">🗑</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>No questions yet</h3>
+        <p>
+            {% if search_query or filter_type %}
+                No results found. Try a different filter or search term.
+            {% else %}
+                Click <strong>Add Q&amp;A</strong> to add your first interview question!
+            {% endif %}
+        </p>
+    </div>
+    {% endif %}
+
+</main>
+
+<script>
+    // ===== Toggle add form =====
+    function toggleForm() {
+        const panel = document.getElementById('add-panel');
+        const isOpen = panel.classList.toggle('open');
+        document.getElementById('form-btn-icon').textContent = isOpen ? '✕' : '＋';
+        document.getElementById('form-btn-text').textContent = isOpen ? 'Close' : 'Add Q&A';
+        if (isOpen) {
+            setTimeout(() => document.getElementById('question').focus(), 100);
+        }
+    }
+
+    // ===== Toggle answer card =====
+    function toggleAnswer(id) {
+        const wrap = document.getElementById('answer-' + id);
+        const isOpen = wrap.classList.toggle('open');
+        if (isOpen) {
+            renderMarkdown('md-' + id);
+        }
+    }
+
+    // ===== Render markdown with highlight.js =====
+    function renderMarkdown(elemId) {
+        const el = document.getElementById(elemId);
+        if (!el || el.dataset.rendered) return;
+
+        // Read raw markdown from the hidden <textarea> sibling
+        // (textarea preserves ALL whitespace/newlines — unlike HTML attributes)
+        const noteId = elemId.replace('md-', '');
+        const rawEl = document.getElementById('raw-' + noteId);
+        const raw = rawEl ? rawEl.value : '';
+
+        if (!raw.trim()) {
+            el.innerHTML = '<em style="color:var(--text-muted)">No answer provided yet.</em>';
+            el.dataset.rendered = '1';
+            return;
+        }
+
+        marked.setOptions({ breaks: true, gfm: true });
+        el.innerHTML = marked.parse(raw);
+        el.querySelectorAll('pre code').forEach(block => {
+            hljs.highlightElement(block);
+        });
+        el.dataset.rendered = '1';
+    }
+
+    // ===== Write / Preview tabs =====
+    function switchTab(tab) {
+        const writeArea = document.getElementById('answer-write-area');
+        const previewArea = document.getElementById('answer-preview-area');
+        const tabWrite = document.getElementById('tab-write');
+        const tabPreview = document.getElementById('tab-preview');
+        const previewContent = document.getElementById('answer-preview-content');
+
+        if (tab === 'preview') {
+            const raw = document.getElementById('answer').value;
+            marked.setOptions({ breaks: true, gfm: true });
+            previewContent.innerHTML = raw.trim()
+                ? marked.parse(raw)
+                : '<em style="color:var(--text-muted)">Nothing to preview yet…</em>';
+            previewContent.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
+            writeArea.style.display = 'none';
+            previewArea.style.display = 'block';
+            tabWrite.classList.remove('active');
+            tabPreview.classList.add('active');
+        } else {
+            writeArea.style.display = 'block';
+            previewArea.style.display = 'none';
+            tabWrite.classList.add('active');
+            tabPreview.classList.remove('active');
+        }
+    }
+
+    // ===== Live search on Enter =====
+    document.getElementById('search-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('search-form').submit();
+        }
+    });
+
+    // Auto-submit search after 600ms pause
+    let searchTimer;
+    document.getElementById('search-input').addEventListener('input', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+            document.getElementById('search-form').submit();
+        }, 600);
+    });
+
+    // ===== Tab key in visible textareas only =====
+    document.querySelectorAll('textarea').forEach(function(ta) {
+        ta.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab' && this.style.display !== 'none') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + 4;
+            }
+        });
+    });
+
+    // ===== Custom type toggle =====
+    function toggleCustomType(selectEl, inputId) {
+        const wrap = document.getElementById(inputId + '_wrap');
+        const input = document.getElementById(inputId);
+        if (selectEl.value === '__custom__') {
+            wrap.style.display = 'block';
+            input.required = true;
+            setTimeout(() => input.focus(), 50);
+        } else {
+            wrap.style.display = 'none';
+            input.required = false;
+            input.value = '';
+        }
+    }
+
+    // Auto open form if no notes
+    {% if not notes and not search_query and not filter_type %}
+    toggleForm();
+    {% endif %}
+</script>
+</body>
+</html>

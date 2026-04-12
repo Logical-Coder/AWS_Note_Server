@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Q&A — Interview Prep</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-card: #1c2128;
+            --bg-input: #21262d;
+            --border: #30363d;
+            --border-hover: #484f58;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #656d76;
+            --accent: #388bfd;
+            --accent-hover: #58a6ff;
+            --success: #3fb950;
+            --danger: #f85149;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: 0.2s ease;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+        }
+        .header-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            gap: 16px;
+        }
+        .logo {
+            display: flex; align-items: center;
+            gap: 10px; font-weight: 700;
+            font-size: 1.05rem; color: var(--text-primary);
+            text-decoration: none;
+        }
+        .logo-icon {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent), #bc8cff);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+        .page-title {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 32px 24px 60px;
+        }
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .form-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+        }
+        .form-grid { display: grid; gap: 20px; }
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 640px) {
+            .form-row-2 { grid-template-columns: 1fr; }
+            .main { padding: 20px 12px 60px; }
+            .form-panel { padding: 16px; }
+        }
+        label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+        input[type="text"],
+        input[type="file"],
+        select,
+        textarea {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color var(--transition), box-shadow var(--transition);
+            -webkit-appearance: none;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(56,139,253,0.15);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 200px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.65;
+        }
+        select option { background: var(--bg-card); }
+        input[type="file"] {
+            border-style: dashed;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        input[type="file"]:hover { border-color: var(--accent); }
+
+        /* Tabs */
+        .tab-bar {
+            display: flex; gap: 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 12px;
+        }
+        .tab {
+            padding: 8px 16px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all var(--transition);
+            user-select: none;
+        }
+        .tab.active { color: var(--accent-hover); border-bottom-color: var(--accent); }
+        .tab:hover:not(.active) { color: var(--text-secondary); }
+
+        .preview-area {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            min-height: 200px;
+            display: none;
+        }
+
+        /* Markdown body (same as home) */
+        .md-body { font-size: 0.875rem; color: var(--text-primary); line-height: 1.75; }
+        .md-body p { margin-bottom: 10px; }
+        .md-body p:last-child { margin-bottom: 0; }
+        .md-body strong { color: var(--accent-hover); }
+        .md-body code {
+            background: var(--bg-primary); color: var(--accent-hover);
+            padding: 1px 6px; border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+        }
+        .md-body pre {
+            background: var(--bg-primary); border: 1px solid var(--border);
+            border-radius: 8px; overflow-x: auto; margin: 10px 0;
+        }
+        .md-body pre code {
+            background: transparent; padding: 14px 16px;
+            display: block; font-size: 0.82rem; line-height: 1.65;
+        }
+        .md-body ul, .md-body ol { padding-left: 20px; margin-bottom: 10px; }
+
+        .md-hint {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.78rem; color: var(--text-muted); margin-top: 6px;
+        }
+        .md-hint code {
+            background: var(--bg-card); padding: 1px 5px;
+            border-radius: 4px; font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-hover); font-size: 0.78rem;
+        }
+
+        /* Current file */
+        .current-file {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.8rem; color: var(--accent);
+            text-decoration: none;
+            background: rgba(56,139,253,0.1);
+            padding: 5px 12px; border-radius: 6px;
+            margin-top: 6px;
+        }
+        .current-file:hover { background: rgba(56,139,253,0.2); }
+
+        .form-actions {
+            display: flex; gap: 10px;
+            justify-content: flex-end; margin-top: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #1f6feb);
+            color: #fff; border: none;
+            border-radius: var(--radius-sm);
+            padding: 10px 24px;
+            font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            transition: opacity var(--transition), transform var(--transition);
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-ghost {
+            background: transparent; color: var(--text-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 20px; font-size: 0.9rem; font-weight: 500;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            text-decoration: none; display: inline-flex;
+            align-items: center; gap: 6px;
+            transition: border-color var(--transition), color var(--transition);
+        }
+        .btn-ghost:hover { border-color: var(--border-hover); color: var(--text-primary); }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <a class="logo" href="{% url 'home' %}">
+            <div class="logo-icon">🧠</div>
+            Interview Prep
+        </a>
+        <span class="page-title">Editing Q&amp;A</span>
+    </div>
+</header>
+
+<main class="main">
+    <div class="section-title">✏️ Edit Question &amp; Answer</div>
+
+    <div class="form-panel">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-grid">
+
+                <!-- Question -->
+                <div>
+                    <label for="question">Question *</label>
+                    <textarea name="question" id="question" rows="3" required>{{ note.question }}</textarea>
+                </div>
+
+                <!-- Type -->
+                <div>
+                    <label for="question_type">Type</label>
+                    <select name="question_type" id="question_type"
+                            onchange="toggleCustomType(this, 'edit_custom_type')">
+                        {% for val, display in type_choices %}
+                            <option value="{{ val }}" {% if note.question_type == val %}selected{% endif %}>
+                                {{ display }}
+                            </option>
+                        {% endfor %}
+                        <option value="__custom__">＋ Add Custom Type…</option>
+                    </select>
+                    <div id="edit_custom_type_wrap" style="display:none; margin-top:8px;">
+                        <input type="text" name="custom_type" id="edit_custom_type"
+                               placeholder="e.g. Spring Boot, GraphQL, Flutter…"
+                               maxlength="50" autocomplete="off">
+                        <div class="md-hint" style="margin-top:4px;">💡 Saved as a new type, appears in filters automatically</div>
+                    </div>
+                </div>
+
+                <!-- Answer with Write/Preview tabs -->
+                <div>
+                    <label>Answer (supports Markdown &amp; code blocks)</label>
+                    <div class="tab-bar">
+                        <div class="tab active" id="tab-write" onclick="switchTab('write')">✏️ Write</div>
+                        <div class="tab" id="tab-preview" onclick="switchTab('preview')">👁 Preview</div>
+                    </div>
+                    <div id="write-area">
+                        <textarea name="answer" id="answer" rows="12"
+                                  style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;line-height:1.65;background:#0d1117;">{{ note.answer }}</textarea>
+                        <div class="md-hint">
+                            💡 Use <code>```python</code> … <code>```</code> for syntax-highlighted code
+                        </div>
+                    </div>
+                    <div class="preview-area" id="preview-area">
+                        <div class="md-body" id="preview-content"></div>
+                    </div>
+                </div>
+
+                <!-- Attachment -->
+                <div>
+                    <label>Attachment</label>
+                    <input type="file" name="attachment">
+                    {% if note.attachment %}
+                        <a class="current-file" href="{{ note.attachment.url }}" target="_blank">
+                            📎 View current attachment
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <a class="btn-ghost" href="{% url 'home' %}">← Back</a>
+                    <button type="submit" class="btn-primary">💾 Update Q&amp;A</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script>
+    function switchTab(tab) {
+        const writeArea = document.getElementById('write-area');
+        const previewArea = document.getElementById('preview-area');
+        const tabWrite = document.getElementById('tab-write');
+        const tabPreview = document.getElementById('tab-preview');
+        const previewContent = document.getElementById('preview-content');
+
+        if (tab === 'preview') {
+            const raw = document.getElementById('answer').value;
+            marked.setOptions({ breaks: true, gfm: true });
+            previewContent.innerHTML = raw.trim()
+                ? marked.parse(raw)
+                : '<em style="color:var(--text-muted)">Nothing to preview yet…</em>';
+            previewContent.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
+            writeArea.style.display = 'none';
+            previewArea.style.display = 'block';
+            tabWrite.classList.remove('active');
+            tabPreview.classList.add('active');
+        } else {
+            writeArea.style.display = 'block';
+            previewArea.style.display = 'none';
+            tabWrite.classList.add('active');
+            tabPreview.classList.remove('active');
+        }
+    }
+
+    // ===== Custom type toggle =====
+    function toggleCustomType(selectEl, inputId) {
+        const wrap  = document.getElementById(inputId + '_wrap');
+        const input = document.getElementById(inputId);
+        if (selectEl.value === '__custom__') {
+            wrap.style.display = 'block';
+            input.required = true;
+            setTimeout(() => input.focus(), 50);
+        } else {
+            wrap.style.display = 'none';
+            input.required = false;
+            input.value = '';
+        }
+    }
+
+    // ===== Tab key in visible textareas only =====
+    document.querySelectorAll('textarea').forEach(function(ta) {
+        ta.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab' && this.style.display !== 'none') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end   = this.selectionEnd;
+                this.value  = this.value.substring(0, start) + '    ' + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + 4;
+            }
+        });
+    });
+
+    // ===== Pre-fill custom type if note has a non-standard type =====
+    (function () {
+        const predefined = new Set([
+            {% for val, display in type_choices %}'{{ val }}',{% endfor %}
+        ]);
+        const currentType = '{{ note.question_type }}';
+        const sel  = document.getElementById('question_type');
+        const wrap = document.getElementById('edit_custom_type_wrap');
+        const inp  = document.getElementById('edit_custom_type');
+
+        if (currentType && !predefined.has(currentType)) {
+            sel.value          = '__custom__';
+            wrap.style.display = 'block';
+            inp.value          = currentType.replace(/_/g, ' ');
+            inp.required       = true;
+        }
+    })();
+</script>
+</body>
+</html>
