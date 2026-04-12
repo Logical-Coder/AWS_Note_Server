@@ -1,4 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+from django.core.paginator import Paginator
 from .models import QANote
 
 
@@ -67,25 +70,40 @@ def home(request):
             )
         return redirect('home')
 
-    filter_type  = request.GET.get('type', '')
-    search_query = request.GET.get('q', '')
+    filter_type     = request.GET.get('type', '')
+    filter_subtopic = request.GET.get('subtopic', '')
+    search_query    = request.GET.get('q', '')
 
     notes = QANote.objects.all()
 
     if filter_type:
         notes = notes.filter(question_type=filter_type)
 
+    if filter_subtopic:
+        notes = notes.filter(question_subtopic=filter_subtopic)
+
     if search_query:
         notes = notes.filter(question__icontains=search_query) | \
                 notes.filter(answer__icontains=search_query)
 
+    # Get current subtopics for the selected type
+    current_subtopics = QANote.QUESTION_SUBTOPICS.get(filter_type, []) if filter_type else []
+
+    # Pagination: 10 questions per page
+    paginator = Paginator(notes, 10)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'notes/home.html', {
-        'notes':           notes,
-        'type_choices':    _build_type_choices(),
-        'format_choices':  QANote.QUESTION_FORMAT_CHOICES,
-        'subtopics':       QANote.QUESTION_SUBTOPICS,
-        'filter_type':     filter_type,
-        'search_query':    search_query,
+        'page_obj':            page_obj,
+        'notes':               page_obj.object_list,
+        'type_choices':        _build_type_choices(),
+        'format_choices':      QANote.QUESTION_FORMAT_CHOICES,
+        'subtopics':           QANote.QUESTION_SUBTOPICS,
+        'current_subtopics':   current_subtopics,
+        'filter_type':         filter_type,
+        'filter_subtopic':     filter_subtopic,
+        'search_query':        search_query,
     })
 
 
@@ -121,3 +139,13 @@ def delete_note(request, note_id):
         return redirect('home')
 
     return render(request, 'notes/delete_note.html', {'note': note})
+
+
+@require_POST
+def increment_read_count(request, note_id):
+    """Increment the read count for a note (AJAX endpoint)"""
+    note = get_object_or_404(QANote, id=note_id)
+    note.read_count += 1
+    note.save(update_fields=['read_count'])
+    
+    return JsonResponse({'read_count': note.read_count, 'success': True})

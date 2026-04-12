@@ -247,10 +247,11 @@ class QANote(models.Model):
         default='description'
     )
     attachment = models.FileField(upload_to='notes/', blank=True, null=True)
+    read_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['read_count', '-created_at']
 
     def __str__(self):
         return f"[{self.get_question_type_display()}] {self.question[:80]}"
