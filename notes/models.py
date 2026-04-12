@@ -255,3 +255,20 @@ class QANote(models.Model):
 
     def __str__(self):
         return f"[{self.get_question_type_display()}] {self.question[:80]}"
+
+
+class Answer(models.Model):
+    """
+    Represents a single answer to a question.
+    Multiple answers can exist for one question.
+    """
+    question = models.ForeignKey(QANote, on_delete=models.CASCADE, related_name='answers')
+    answer_text = models.TextField()
+    read_count = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['read_count', '-created_at']  # Ascending read_count (0 first)
+
+    def __str__(self):
+        return f"Answer to {self.question.id} - Reads: {self.read_count}"

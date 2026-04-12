@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.core.paginator import Paginator
-from .models import QANote
+from .models import QANote, Answer
 
 
 def _resolve_type(post_data):
@@ -60,14 +60,17 @@ def home(request):
         attachment      = request.FILES.get('attachment')
 
         if question:
-            QANote.objects.create(
+            note = QANote.objects.create(
                 question=question,
-                answer=answer,
+                answer=answer,  # Keep for backward compatibility
                 question_type=question_type,
                 question_subtopic=question_subtopic,
                 question_format=question_format,
                 attachment=attachment,
             )
+            # Create Answer entry for the new answer
+            if answer:
+                Answer.objects.create(question=note, answer_text=answer)
         return redirect('home')
 
     filter_type     = request.GET.get('type', '')
@@ -149,3 +152,34 @@ def increment_read_count(request, note_id):
     note.save(update_fields=['read_count'])
     
     return JsonResponse({'read_count': note.read_count, 'success': True})
+
+
+@require_POST
+def increment_answer_read_count(request, answer_id):
+    """Increment the read count for an answer (AJAX endpoint)"""
+    answer = get_object_or_404(Answer, id=answer_id)
+    answer.read_count += 1
+    answer.save(update_fields=['read_count'])
+    
+    return JsonResponse({'read_count': answer.read_count, 'success': True})
+
+
+@require_POST
+def add_answer(request):
+    """Add a new answer to a question (AJAX endpoint)"""
+    question_id = request.POST.get('question_id')
+    answer_text = request.POST.get('answer_text', '').strip()
+    
+    if not question_id or not answer_text:
+        return JsonResponse({'success': False, 'error': 'Missing question_id or answer_text'}, status=400)
+    
+    try:
+        question = get_object_or_404(QANote, id=question_id)
+        answer = Answer.objects.create(question=question, answer_text=answer_text)
+        return JsonResponse({
+            'success': True,
+            'answer_id': answer.id,
+            'message': 'Answer added successfully'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)

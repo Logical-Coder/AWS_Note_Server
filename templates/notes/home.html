@@ -365,11 +365,8 @@
         /* ===== Q&A CARDS GRID ===== */
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            grid-template-columns: 1fr;
             gap: 20px;
-        }
-        @media (max-width: 768px) {
-            .cards-grid { grid-template-columns: 1fr; }
         }
 
         /* ===== Q&A CARD ===== */
@@ -669,12 +666,6 @@
                 font-size: 0.75rem;
             }
         }
-        @media (min-width: 641px) and (max-width: 1023px) {
-            .cards-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (min-width: 1024px) {
-            .cards-grid { grid-template-columns: repeat(3, 1fr); }
-        }
 
         /* ===== UTILS ===== */
         .divider { height: 1px; background: var(--border); margin: 24px 0; }
@@ -902,31 +893,63 @@
                 <span class="card-num">#{{ forloop.counter }}</span>
             </div>
 
-            <div class="card-question" onclick="toggleAnswer('{{ note.id }}')">
+            <div class="card-question">
                 {{ note.question }}
             </div>
 
-            <div class="card-answer-wrap" id="answer-{{ note.id }}">
-                <div class="answer-label">✅ Answer</div>
-                {# Hidden textarea preserves ALL newlines/spaces/indentation — unlike HTML attributes #}
-                <textarea id="raw-{{ note.id }}" style="display:none;" aria-hidden="true">{{ note.answer }}</textarea>
-                <div class="md-body" id="md-{{ note.id }}"></div>
+            <!-- Answers Section -->
+            <div class="card-answers-wrap" id="answers-{{ note.id }}">
+                <div style="display:none;" id="answers-content-{{ note.id }}">
+                    <!-- All Answers (sorted by read count ascending) -->
+                    {% if note.answers.all %}
+                    <div style="border-top: 1px solid var(--border); padding: 16px 18px;">
+                        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 14px;">
+                            📚 All Answers ({{ note.answers.count }})
+                        </div>
+                        {% for answer in note.answers.all %}
+                        <div style="margin-bottom: 16px; padding: 12px; background: rgba(0,0,0,0.1); border-radius: 6px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span class="read-badge" id="answer-read-{{ answer.id }}" style="background:rgba(63,211,83,0.15); color:var(--success); font-size:0.65rem; font-weight:700; padding:2px 8px; border-radius:16px;">
+                                    👁 {{ answer.read_count }}
+                                </span>
+                                <button class="action-btn" style="font-size:0.75rem; padding:4px 10px;" onclick="incrementAnswerReadCount('{{ answer.id }}')">
+                                    📖 Read
+                                </button>
+                            </div>
+                            <textarea id="raw-answer-{{ answer.id }}" style="display:none;" aria-hidden="true">{{ answer.answer_text }}</textarea>
+                            <div class="md-body" id="md-answer-{{ answer.id }}" style="font-size:0.85rem;"></div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div style="padding: 16px 18px; text-align: center; color: var(--text-muted);">
+                        <em>No answers yet. Add one below!</em>
+                    </div>
+                    {% endif %}
 
-                {% if note.attachment %}
-                <a class="attach-link" href="{{ note.attachment.url }}" target="_blank">
-                    📎 Open Attachment
-                </a>
-                {% endif %}
+                    <!-- Add New Answer Form -->
+                    <div style="border-top: 1px solid var(--border); padding: 16px 18px;">
+                        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px;">
+                            ➕ Add New Answer
+                        </div>
+                        <form method="post" onsubmit="addAnswer(event, '{{ note.id }}')">
+                            <input type="hidden" name="question_id" value="{{ note.id }}">
+                            <textarea name="new_answer" id="new-answer-{{ note.id }}" rows="4" 
+                                    placeholder="Type your answer here…"
+                                    style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px; font-family:inherit; font-size:0.875rem; resize:vertical; min-height:100px;"></textarea>
+                            <button type="submit" style="margin-top:10px; padding:8px 16px; background:var(--accent); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:500;">
+                                💾 Save Answer
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <div class="card-footer">
-                <span class="card-meta">{{ note.created_at|date:"M d, Y" }}</span>
+                <span class="card-meta">{{ note.created_at|date:"M d, Y" }} • {{ note.answers.count }} answer{{ note.answers.count|pluralize }}</span>
                 <div class="card-actions">
-                    <button class="action-btn toggle-btn" onclick="toggleAnswer('{{ note.id }}')">
-                        👁 Answer
-                    </button>
-                    <button class="action-btn" onclick="incrementReadCount('{{ note.id }}')">
-                        📖 Read
+                    <button class="action-btn toggle-btn" onclick="toggleAnswers('{{ note.id }}')">
+                        🔓 Open
                     </button>
                     <a class="action-btn" href="{% url 'edit_note' note.id %}">✏️ Edit</a>
                     <a class="action-btn danger" href="{% url 'delete_note' note.id %}">🗑</a>
@@ -982,19 +1005,31 @@
         }
     }
 
-    // ===== Toggle answer card =====
-    function toggleAnswer(id) {
-        const wrap = document.getElementById('answer-' + id);
-        const isOpen = wrap.classList.toggle('open');
+    // ===== Toggle answers section =====
+    function toggleAnswers(id) {
+        const content = document.getElementById('answers-content-' + id);
+        const btn = event.target;
+        const isOpen = content.style.display === 'block';
+        
         if (isOpen) {
-            renderMarkdown('md-' + id);
+            content.style.display = 'none';
+            btn.textContent = '🔓 Open';
+        } else {
+            content.style.display = 'block';
+            btn.textContent = '🔒 Close';
+            // Render all markdown answers
+            document.querySelectorAll('[id^="md-answer-"]').forEach(el => {
+                if (!el.dataset.rendered) {
+                    renderMarkdownAnswer(el.id);
+                }
+            });
         }
     }
 
     // ===== Increment read count =====
     function incrementReadCount(id) {
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
-        const url = `/notes/increment-read/${id}/`;
+        const url = `/increment-read/${id}/`;
         
         fetch(url, {
             method: 'POST',
@@ -1003,7 +1038,12 @@
                 'Content-Type': 'application/json'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 const badge = document.getElementById('read-count-' + id);
@@ -1016,6 +1056,75 @@
             }
         })
         .catch(err => console.error('Error incrementing read count:', err));
+    }
+
+    // ===== Increment answer read count =====
+    function incrementAnswerReadCount(answerId) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        const url = `/increment-answer-read/${answerId}/`;
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const badge = document.getElementById('answer-read-' + answerId);
+                if (badge) {
+                    badge.textContent = '👁 ' + data.read_count;
+                    badge.style.transform = 'scale(1.1)';
+                    setTimeout(() => badge.style.transform = 'scale(1)', 200);
+                }
+            }
+        })
+        .catch(err => console.error('Error incrementing answer read count:', err));
+    }
+
+    // ===== Add new answer =====
+    function addAnswer(event, questionId) {
+        event.preventDefault();
+        const form = event.target;
+        const answerText = form.querySelector('[name="new_answer"]').value.trim();
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        
+        if (!answerText) {
+            alert('Please enter an answer.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('question_id', questionId);
+        formData.append('answer_text', answerText);
+        formData.append('csrfmiddlewaretoken', csrfToken);
+
+        fetch('/add-answer/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Clear the form
+                form.reset();
+                // Reload the page to show the new answer
+                location.reload();
+            } else {
+                alert('Error adding answer: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(err => console.error('Error adding answer:', err));
     }
 
     // ===== Render markdown with highlight.js =====
@@ -1031,6 +1140,29 @@
 
         if (!raw.trim()) {
             el.innerHTML = '<em style="color:var(--text-muted)">No answer provided yet.</em>';
+            el.dataset.rendered = '1';
+            return;
+        }
+
+        marked.setOptions({ breaks: true, gfm: true });
+        el.innerHTML = marked.parse(raw);
+        el.querySelectorAll('pre code').forEach(block => {
+            hljs.highlightElement(block);
+        });
+        el.dataset.rendered = '1';
+    }
+
+    // ===== Render markdown for answers =====
+    function renderMarkdownAnswer(elemId) {
+        const el = document.getElementById(elemId);
+        if (!el || el.dataset.rendered) return;
+
+        const answerId = elemId.replace('md-answer-', '');
+        const rawEl = document.getElementById('raw-answer-' + answerId);
+        const raw = rawEl ? rawEl.value : '';
+
+        if (!raw.trim()) {
+            el.innerHTML = '<em style="color:var(--text-muted)">No content.</em>';
             el.dataset.rendered = '1';
             return;
         }
