@@ -1,0 +1,20 @@
+TYPE: python
+SUBTOPIC: Decorators
+FORMAT: description
+QUESTION: What is a decorator in Python?
+ANSWER: A decorator is a function that modifies another function.
+
+ANSWER: Example:
+@decorator
+def func():
+    pass
+
+---
+
+TYPE: aws
+SUBTOPIC: EC2
+FORMAT: description
+QUESTION: What is EC2?
+ANSWER: EC2 is a virtual server in AWS.
+
+---

@@ -345,6 +345,41 @@
                     {% endif %}
                 </div>
 
+                <!-- Existing Answers -->
+                {% if note.answers.count > 0 %}
+                <div style="background:var(--bg-input); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px;">
+                    <div style="font-size:0.95rem; font-weight:600; color:var(--text-primary); margin-bottom:12px;">
+                        📚 Existing Answers ({{ note.answers.count }})
+                    </div>
+                    {% for answer in note.answers.all %}
+                    <div style="background:rgba(0,0,0,0.2); border:1px solid var(--border); border-radius:6px; padding:12px; margin-bottom:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span style="font-size:0.8rem; color:var(--text-secondary);">Answer #{{ forloop.counter }}</span>
+                            <span style="font-size:0.75rem; background:rgba(63,211,83,0.15); color:var(--success); padding:2px 8px; border-radius:12px;">
+                                👁 {{ answer.read_count }} reads
+                            </span>
+                        </div>
+                        <div style="background:var(--bg-primary); border:1px solid var(--border); border-radius:4px; padding:8px; font-size:0.85rem; max-height:100px; overflow-y:auto; color:var(--text-secondary);">
+                            {{ answer.answer_text|truncatewords:30 }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Add New Answer -->
+                <div style="background:rgba(56,139,253,0.05); border:2px solid var(--accent); border-radius:var(--radius-sm); padding:16px;">
+                    <div style="font-size:0.95rem; font-weight:600; color:var(--accent); margin-bottom:12px;">
+                        ➕ Add Another Answer
+                    </div>
+                    <form method="post" onsubmit="addNewAnswer(event, '{{ note.id }}')">
+                        <textarea name="new_answer" id="new-answer-edit" rows="6" placeholder="Type your answer here…" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px; font-family:'JetBrains Mono',monospace; font-size:0.85rem; resize:vertical; background:var(--bg-input); color:var(--text-primary);"></textarea>
+                        <button type="submit" style="margin-top:10px; padding:10px 18px; background:var(--accent); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.9rem;">
+                            💾 Add Answer
+                        </button>
+                    </form>
+                </div>
+
                 <!-- Actions -->
                 <div class="form-actions">
                     <a class="btn-ghost" href="{% url 'home' %}">← Back</a>
@@ -366,7 +401,7 @@
         if (tab === 'preview') {
             const raw = document.getElementById('answer').value;
             marked.setOptions({ breaks: true, gfm: true });
-            previewContent.innerHTML = raw.trim()
+            previewContent.innerHTML = raw.length
                 ? marked.parse(raw)
                 : '<em style="color:var(--text-muted)">Nothing to preview yet…</em>';
             previewContent.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
@@ -488,6 +523,47 @@
             inp.required       = true;
         }
     })();
+
+    // ===== Add new answer =====
+    function addNewAnswer(event, questionId) {
+        event.preventDefault();
+        const form = event.target;
+        const answerText = document.getElementById('new-answer-edit').value;
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        
+        if (!/\S/.test(answerText)) {
+            alert('Please enter an answer.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('question_id', questionId);
+        formData.append('answer_text', answerText);
+
+        fetch('/add-answer/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Clear the form
+                document.getElementById('new-answer-edit').value = '';
+                alert('Answer added! Refresh to see it.');
+                // Reload to show new answer
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            alert('Error adding answer');
+        });
+    }
 </script>
 </body>
 </html>

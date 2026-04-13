@@ -1,0 +1,258 @@
+1.Identify the Entities
+
+
+Business Requirements
+
+1. There are Topics or Subject or skills
+2. Every Topic has Questions
+3. Every Question has multiple Answers
+4. Every Question has level Basic Intermediate Advanced
+4. Each Answers has read count
+
+Questions
+Answers
+Readcount
+Format of Questions
+
+
+
+
+1. Questions
+2. Questions Type multiple choice or Description based
+3. Questions Subtopic
+4. Questions tag
+
+Topic
+1.Topic 
+
+Relations
+
+Topic vs Question
+1 Topic has multiple Questions
+1 Question is related to 1 Topic 
+1 : M
+Question has is FK of Topic
+
+
+Question vs Question level 
+1 Question can has one Question level
+1 Question level can contain many Question
+
+1 : 1
+M : 1
+
+Question contain FK of Question level
+
+Question vs Subtopic
+1 Question can be related to 1 Subtopic 1 : 1
+1 Subtopic can contain many Question  1 : M
+
+So Question contain FK of Subtopic
+
+Question vs Tag
+1 Question can have many tag 1 : M
+1 Tag can contain many Question M : 1
+
+M : M 
+
+Another Table
+QuestionID Tag_id
+
+
+Question vs Answers
+1 Question can have multiple Answers 1 : M 
+1 Answers can be related to 1 Question 1 : 1
+
+Answers has to FK of Question
+
+Question vs Readcount_of_Question
+1 Question can be read multiple times 1 : M 
+1 Readcount is will be related to 1 Question
+
+1 : M 
+1  : 1
+
+Readcount_of_Question Table has FK of Question
+
+
+
+
+
+
+
+
+1.Identify the Entities
+
+
+Business Requirements
+
+1. There are Topics or Subject or skills
+2. Every Topic has Questions
+3. Every Question has multiple Answers
+4. Every Question has level Basic Intermediate Advanced
+4. Each Answers has read count
+
+Questions
+Answers
+Readcount
+Format of Questions
+
+
+
+
+1. Questions
+2. Questions Type multiple choice or Description based
+3. Questions Subtopic
+4. Questions tag
+
+Topic
+1.Topic 
+
+Relations
+
+Topic vs Question
+1 Topic has multiple Questions
+1 Question is related to 1 Topic 
+1 : M
+Question has is FK of Topic
+
+
+Question vs Question level 
+1 Question can has one Question level
+1 Question level can contain many Question
+
+1 : 1
+M : 1
+
+Question contain FK of Question level
+
+Question vs Subtopic
+1 Question can be related to 1 Subtopic 1 : 1
+1 Subtopic can contain many Question  1 : M
+
+So Question contain FK of Subtopic
+
+Question vs Tag
+1 Question can have many tag 1 : M
+1 Tag can contain many Question M : 1
+
+M : M 
+
+Another Table
+QuestionID Tag_id
+
+
+Question vs Answers
+1 Question can have multiple Answers 1 : M 
+1 Answers can be related to 1 Question 1 : 1
+
+Answers has to FK of Question
+
+Question vs Readcount_of_Question
+1 Question can be read multiple times 1 : M 
+1 Readcount is will be related to 1 Question
+
+1 : M 
+1  : 1
+
+Readcount_of_Question Table has FK of Question
+
+
+
+
+
+----
+
+
+
+Corrected schema with read history
+Topic
+id
+name
+description
+Subtopic
+id
+topic_id FK
+name
+description
+Question
+id
+topic_id FK
+subtopic_id FK
+level
+question_type
+question_text
+format
+created_at
+updated_at
+Answer
+id
+question_id FK
+answer_text
+is_correct
+display_order
+created_at
+Tag
+id
+name
+QuestionTag
+id
+question_id FK
+tag_id FK
+QuestionReadHistory
+id
+question_id FK
+user_id FK nullable
+read_at
+duration_seconds optional
+device_info optional
+session_id optional
+
+Optional:
+
+AnswerReadHistory
+id
+answer_id FK
+user_id FK nullable
+read_at
+Relationships including read history
+Topic vs Question
+1 Topic : many Questions
+Topic vs Subtopic
+1 Topic : many Subtopics
+Subtopic vs Question
+1 Subtopic : many Questions
+Question vs Answer
+1 Question : many Answers
+Question vs Tag
+many-to-many
+through QuestionTag
+Question vs QuestionReadHistory
+1 Question : many ReadHistory rows
+
+This means:
+
+one question can be read many times
+each read history row belongs to one question
+
+So this part becomes:
+
+Question 1 : M QuestionReadHistory
+
+If answer read history is present:
+
+Answer 1 : M AnswerReadHistory
+
+
+
+
+
+
+
+
+
+
+
+
+
+

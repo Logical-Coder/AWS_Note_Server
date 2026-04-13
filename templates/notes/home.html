@@ -40,19 +40,22 @@
             --transition: 0.2s ease;
 
             /* Type badge colors */
-            --dsa:         #58a6ff;
-            --system_design: #bc8cff;
-            --os:          #ff7b72;
-            --dbms:        #ffa657;
-            --networking:  #39d353;
-            --oop:         #f778ba;
-            --sql:         #79c0ff;
-            --javascript:  #f0e060;
-            --python:      #4d94ff;
-            --java:        #ff9f43;
-            --react:       #61dafb;
-            --behavioral:  #a5d6ff;
-            --other:       #8b949e;
+            --dsa:          #58a6ff;
+            --system_design:#bc8cff;
+            --os:           #ff7b72;
+            --dbms:         #ffa657;
+            --networking:   #39d353;
+            --oop:          #f778ba;
+            --sql:          #79c0ff;
+            --javascript:   #f0e060;
+            --python:       #4d94ff;
+            --react:        #61dafb;
+            --behavioral:   #a5d6ff;
+            --aws:          #ff9900;
+            --django:       #44b78b;
+            --linux:        #fcc624;
+            --docker:       #2496ed;
+            --other:        #8b949e;
         }
 
         /* ===== RESET & BASE ===== */
@@ -457,7 +460,14 @@
         }
 
         /* Markdown rendered content */
-        .md-body { font-size: 0.875rem; color: var(--text-primary); line-height: 1.75; }
+        .md-body { 
+            font-size: 0.875rem; 
+            color: var(--text-primary); 
+            line-height: 1.75;
+            min-height: 40px;
+            padding: 8px 0;
+            display: block;
+        }
         .md-body p { margin-bottom: 10px; }
         .md-body p:last-child { margin-bottom: 0; }
         .md-body strong { color: var(--accent-hover); }
@@ -893,63 +903,102 @@
                 <span class="card-num">#{{ forloop.counter }}</span>
             </div>
 
-            <div class="card-question">
+            <div class="card-question" onclick="toggleAnswers('{{ note.id }}')">
                 {{ note.question }}
             </div>
 
-            <!-- Answers Section -->
-            <div class="card-answers-wrap" id="answers-{{ note.id }}">
-                <div style="display:none;" id="answers-content-{{ note.id }}">
-                    <!-- All Answers (sorted by read count ascending) -->
-                    {% if note.answers.all %}
-                    <div style="border-top: 1px solid var(--border); padding: 16px 18px;">
-                        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 14px;">
-                            📚 All Answers ({{ note.answers.count }})
-                        </div>
-                        {% for answer in note.answers.all %}
-                        <div style="margin-bottom: 16px; padding: 12px; background: rgba(0,0,0,0.1); border-radius: 6px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <span class="read-badge" id="answer-read-{{ answer.id }}" style="background:rgba(63,211,83,0.15); color:var(--success); font-size:0.65rem; font-weight:700; padding:2px 8px; border-radius:16px;">
-                                    👁 {{ answer.read_count }}
-                                </span>
-                                <button class="action-btn" style="font-size:0.75rem; padding:4px 10px;" onclick="incrementAnswerReadCount('{{ answer.id }}')">
-                                    📖 Read
-                                </button>
-                            </div>
-                            <textarea id="raw-answer-{{ answer.id }}" style="display:none;" aria-hidden="true">{{ answer.answer_text }}</textarea>
-                            <div class="md-body" id="md-answer-{{ answer.id }}" style="font-size:0.85rem;"></div>
-                        </div>
-                        {% endfor %}
-                    </div>
+            <div style="padding: 12px 18px; display: flex; gap: 10px; border-top: 1px solid var(--border);">
+                <button class="action-btn" style="flex: 1; padding: 8px 12px; min-width: 120px; background: var(--success); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s;" 
+                        onclick="toggleAnswers('{{ note.id }}'); event.stopPropagation();">
+                    {% if note.answers.exists or note.answer %}
+                        🎯 Show Answers
                     {% else %}
-                    <div style="padding: 16px 18px; text-align: center; color: var(--text-muted);">
-                        <em>No answers yet. Add one below!</em>
+                        ✍️ Add Answer
+                    {% endif %}
+                </button>
+            </div>
+
+            <div class="card-answer-wrap" id="answers-panel-{{ note.id }}" style="display:none;">
+                <div style="border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 16px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <div class="answer-label">✅ Answers</div>
+                    <div style="font-size:0.85rem; color: var(--text-secondary);">
+                        {% if note.answer %}
+                            {{ note.answers.count|add:"1" }} answer{{ note.answers.count|add:"1"|pluralize }}
+                        {% else %}
+                            {{ note.answers.count }} answer{{ note.answers.count|pluralize }}
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if note.answer %}
+                <div style="margin-bottom: 16px; padding: 12px; background: rgba(0,0,0,0.1); border-radius: 6px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap:10px; flex-wrap:wrap;">
+                        <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">
+                            ✅ Answer #1
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span class="read-badge" id="note-answer-read-{{ note.id }}" style="background:rgba(63,211,83,0.15); color:var(--success); font-size:0.65rem; font-weight:700; padding:2px 8px; border-radius:16px;">
+                                👁 {{ note.read_count }}
+                            </span>
+                            <button class="action-btn" style="font-size:0.75rem; padding:4px 10px;" onclick="incrementReadCount('{{ note.id }}')">
+                                📖 Read
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="raw-answer-note-{{ note.id }}" style="display:none;" aria-hidden="true">{{ note.answer }}</textarea>
+                    <div class="md-body" id="md-answer-note-{{ note.id }}" style="font-size:0.85rem;"></div>
+                </div>
+                {% endif %}
+
+                {% for answer in note.answers.all %}
+                <div style="margin-bottom: 16px; padding: 12px; background: rgba(0,0,0,0.1); border-radius: 6px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap:10px; flex-wrap:wrap;">
+                        <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">
+                            ✅ Answer #{% if note.answer %}{{ forloop.counter|add:"1" }}{% else %}{{ forloop.counter }}{% endif %}
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span class="read-badge" id="answer-read-{{ answer.id }}" style="background:rgba(63,211,83,0.15); color:var(--success); font-size:0.65rem; font-weight:700; padding:2px 8px; border-radius:16px;">
+                                👁 {{ answer.read_count }}
+                            </span>
+                            <button class="action-btn" style="font-size:0.75rem; padding:4px 10px;" onclick="incrementAnswerReadCount('{{ answer.id }}')">
+                                📖 Read
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="raw-answer-{{ answer.id }}" style="display:none;" aria-hidden="true">{{ answer.answer_text }}</textarea>
+                    <div class="md-body" id="md-answer-{{ answer.id }}" style="font-size:0.85rem;"></div>
+                </div>
+                {% empty %}
+                    {% if not note.answer %}
+                    <div style="padding: 16px 0;">
+                        <div class="md-body" style="color:var(--text-secondary);">
+                            No answers yet. Add the first one below.
+                        </div>
                     </div>
                     {% endif %}
+                {% endfor %}
 
-                    <!-- Add New Answer Form -->
-                    <div style="border-top: 1px solid var(--border); padding: 16px 18px;">
-                        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px;">
-                            ➕ Add New Answer
-                        </div>
-                        <form method="post" onsubmit="addAnswer(event, '{{ note.id }}')">
-                            <input type="hidden" name="question_id" value="{{ note.id }}">
-                            <textarea name="new_answer" id="new-answer-{{ note.id }}" rows="4" 
-                                    placeholder="Type your answer here…"
-                                    style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px; font-family:inherit; font-size:0.875rem; resize:vertical; min-height:100px;"></textarea>
-                            <button type="submit" style="margin-top:10px; padding:8px 16px; background:var(--accent); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:500;">
-                                💾 Save Answer
-                            </button>
-                        </form>
+                <div style="border-top: 1px solid var(--border); padding: 16px 18px; background: rgba(56,139,253,0.05);">
+                    <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px;">
+                        ➕ Add New Answer
                     </div>
+                    <form method="post" onsubmit="addAnswer(event, '{{ note.id }}')">
+                        <input type="hidden" name="question_id" value="{{ note.id }}">
+                        <textarea name="new_answer" id="new-answer-{{ note.id }}" rows="4" 
+                                placeholder="Type your answer here…"
+                                style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px; font-family:inherit; font-size:0.875rem; resize:vertical; min-height:100px;"></textarea>
+                        <button type="submit" style="margin-top:10px; padding:8px 16px; background:var(--accent); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:500;">
+                            💾 Save Answer
+                        </button>
+                    </form>
                 </div>
             </div>
 
             <div class="card-footer">
-                <span class="card-meta">{{ note.created_at|date:"M d, Y" }} • {{ note.answers.count }} answer{{ note.answers.count|pluralize }}</span>
+                <span class="card-meta">{{ note.created_at|date:"M d, Y" }}</span>
                 <div class="card-actions">
-                    <button class="action-btn toggle-btn" onclick="toggleAnswers('{{ note.id }}')">
-                        🔓 Open
+                    <button type="button" class="action-btn" style="font-size:0.75rem; padding:5px 10px;" onclick="toggleAnswers('{{ note.id }}'); event.stopPropagation();">
+                        ➕ Answer
                     </button>
                     <a class="action-btn" href="{% url 'edit_note' note.id %}">✏️ Edit</a>
                     <a class="action-btn danger" href="{% url 'delete_note' note.id %}">🗑</a>
@@ -1007,22 +1056,20 @@
 
     // ===== Toggle answers section =====
     function toggleAnswers(id) {
-        const content = document.getElementById('answers-content-' + id);
-        const btn = event.target;
-        const isOpen = content.style.display === 'block';
-        
+        const panel = document.getElementById('answers-panel-' + id);
+        if (!panel) return;
+
+        const isOpen = panel.style.display === 'block';
+
         if (isOpen) {
-            content.style.display = 'none';
-            btn.textContent = '🔓 Open';
+            panel.style.display = 'none';
         } else {
-            content.style.display = 'block';
-            btn.textContent = '🔒 Close';
-            // Render all markdown answers
-            document.querySelectorAll('[id^="md-answer-"]').forEach(el => {
-                if (!el.dataset.rendered) {
+            panel.style.display = 'block';
+            setTimeout(() => {
+                panel.querySelectorAll('[id^="md-answer-"]').forEach(el => {
                     renderMarkdownAnswer(el.id);
-                }
-            });
+                });
+            }, 50);
         }
     }
 
@@ -1093,10 +1140,10 @@
     function addAnswer(event, questionId) {
         event.preventDefault();
         const form = event.target;
-        const answerText = form.querySelector('[name="new_answer"]').value.trim();
+        const answerText = form.querySelector('[name="new_answer"]').value;
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
         
-        if (!answerText) {
+        if (!/\S/.test(answerText)) {
             alert('Please enter an answer.');
             return;
         }
@@ -1138,7 +1185,7 @@
         const rawEl = document.getElementById('raw-' + noteId);
         const raw = rawEl ? rawEl.value : '';
 
-        if (!raw.trim()) {
+        if (raw.length === 0) {
             el.innerHTML = '<em style="color:var(--text-muted)">No answer provided yet.</em>';
             el.dataset.rendered = '1';
             return;
@@ -1152,26 +1199,57 @@
         el.dataset.rendered = '1';
     }
 
-    // ===== Render markdown for answers =====
+    // Render markdown for answers =====
     function renderMarkdownAnswer(elemId) {
         const el = document.getElementById(elemId);
-        if (!el || el.dataset.rendered) return;
+        if (!el) {
+            console.warn('Answer element not found:', elemId);
+            return;
+        }
+        if (el.dataset.rendered) {
+            console.log('Already rendered:', elemId);
+            return;
+        }
 
         const answerId = elemId.replace('md-answer-', '');
         const rawEl = document.getElementById('raw-answer-' + answerId);
-        const raw = rawEl ? rawEl.value : '';
-
-        if (!raw.trim()) {
-            el.innerHTML = '<em style="color:var(--text-muted)">No content.</em>';
+        
+        if (!rawEl) {
+            console.warn('Raw answer not found for:', answerId);
+            el.innerHTML = '<em style="color:var(--text-muted)">Error: Answer not found</em>';
+            el.style.display = 'block';
             el.dataset.rendered = '1';
             return;
         }
 
-        marked.setOptions({ breaks: true, gfm: true });
-        el.innerHTML = marked.parse(raw);
-        el.querySelectorAll('pre code').forEach(block => {
-            hljs.highlightElement(block);
-        });
+        const raw = rawEl.value || '';
+        console.log('Rendering answer', answerId, 'with content length:', raw.length);
+
+        if (raw.length === 0) {
+            console.log('Answer is empty:', answerId);
+            el.innerHTML = '<em style="color:var(--text-muted)">No answer content yet.</em>';
+            el.style.display = 'block';
+            el.style.minHeight = '40px';
+            el.dataset.rendered = '1';
+            return;
+        }
+
+        try {
+            marked.setOptions({ breaks: true, gfm: true });
+            el.innerHTML = marked.parse(raw);
+            el.querySelectorAll('pre code').forEach(block => {
+                hljs.highlightElement(block);
+            });
+            el.style.display = 'block';
+            el.style.minHeight = '40px';
+            console.log('Successfully rendered answer:', answerId);
+        } catch(e) {
+            console.error('Error rendering markdown:', e);
+            el.innerHTML = '<pre>' + raw + '</pre>';
+            el.style.display = 'block';
+            el.style.minHeight = '40px';
+        }
+        
         el.dataset.rendered = '1';
     }
 
@@ -1186,7 +1264,7 @@
         if (tab === 'preview') {
             const raw = document.getElementById('answer').value;
             marked.setOptions({ breaks: true, gfm: true });
-            previewContent.innerHTML = raw.trim()
+            previewContent.innerHTML = raw.length
                 ? marked.parse(raw)
                 : '<em style="color:var(--text-muted)">Nothing to preview yet…</em>';
             previewContent.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
@@ -1294,7 +1372,16 @@
     }
     
     // Initialize subtopics on page load
-    document.addEventListener('DOMContentLoaded', updateSubtopicList);
+    document.addEventListener('DOMContentLoaded', () => {
+        updateSubtopicList();
+        
+        // Render all first answers (those that are inside #answers-* divs)
+        setTimeout(() => {
+            document.querySelectorAll('[id^="md-answer-"]').forEach(el => {
+                renderMarkdownAnswer(el.id);
+            });
+        }, 200);
+    });
     
     // Update subtopics when type changes
     document.getElementById('question_type').addEventListener('change', updateSubtopicList);
